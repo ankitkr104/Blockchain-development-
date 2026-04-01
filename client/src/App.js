@@ -40,8 +40,22 @@ function App() {
             contractABI,
             signer
           );
+
+          // optional fallback RPC provider for reliable reads
+          let readProvider = null;
+          let readContract = null;
+          const rpcUrl = process.env.REACT_APP_RPC_URL;
+          if (rpcUrl) {
+            try {
+              readProvider = new ethers.providers.JsonRpcProvider(rpcUrl);
+              readContract = new ethers.Contract(contractAddress, contractABI, readProvider);
+            } catch (e) {
+              console.warn("Fallback RPC provider failed:", e);
+            }
+          }
+
           setAccount(account);
-          setState({ provider, signer, contract });
+          setState({ provider, signer, contract, readProvider, readContract });
         } else {
           alert("Please install metamask");
         }
@@ -56,7 +70,7 @@ function App() {
     <div style={{ backgroundColor: "#EFEFEF", height: "100%" }}>
       <img src={chai} className="img-fluid" alt=".." width="100%" />
       <p
-        class="text-muted lead "
+        className="text-muted lead "
         style={{ marginTop: "10px", marginLeft: "5px" }}
       >
         <small>Connected Account - {account}</small>

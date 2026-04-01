@@ -1,15 +1,21 @@
 import { useState, useEffect } from "react";
 const Memos = ({ state }) => {
   const [memos, setMemos] = useState([]);
-  const { contract } = state;
+  const { contract, readContract } = state;
 
   useEffect(() => {
     const memosMessage = async () => {
-      const memos = await contract.getMemos();
-      setMemos(memos);
+      try {
+        const reader = readContract || contract;
+        if (!reader) return;
+        const memos = await reader.getMemos();
+        setMemos(memos);
+      } catch (e) {
+        console.error("Failed to load memos:", e);
+      }
     };
-    contract && memosMessage();
-  }, [contract]);
+    (readContract || contract) && memosMessage();
+  }, [contract, readContract]);
 
   return (
     <>
